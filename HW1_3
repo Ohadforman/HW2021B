@@ -1,0 +1,69 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+E_t=np.linspace(-6.5,-2.5,266)
+ENE_1=[-5,-4.5,-4]
+ENE_2=[-5,-4.3,-4]
+ENE_3=[-5,-4.7,-4]
+
+def NEV(EV,Ep):
+    P=EV-Ep
+    Ne=np.sqrt(P)
+    return Ne
+    
+def NEC(EC,En):
+    P=En-EC
+    #print(P)
+    Ne=np.sqrt(P)
+    #print(Ne)
+    return Ne
+    
+def frmdi(E,EF):
+    T=2000
+    KB=(8.61733)*10**(-5)
+    fFD=1/(1+np.exp((E-EF)/(KB*T)))
+    #print(np.exp((E-EF)/KB*T))
+    #print(fFD)
+    return fFD
+    
+def p_inteng(EV,Ep,EF):
+    In = NEV(EV,Ep)*(1-frmdi(Ep,EF))
+    return In
+    
+def n_inteng(EC,En,EF):
+    In=NEC(EC,En)*frmdi(En,EF)
+    return In
+    
+def get_param(loE):
+    EV=loE[0]
+    EF=loE[1]
+    EC=loE[2]
+    return EV,EF,EC
+
+def plotans(subQ):
+    Ep=np.linspace(-6.5,-5,100)
+    En=np.linspace(-4,-2.5,100)
+    EV,EF,EC=get_param(subQ)
+    
+    p_arr_plot=p_inteng(EV,Ep,EF)
+    n_arr_plot=n_inteng(EC,En,EF)
+    return n_arr_plot,p_arr_plot
+for i in [ENE_3]:
+    plot_Q=i
+    n,p=plotans(plot_Q)
+    np = np.concatenate((p,np.zeros(66), n))
+    
+    EV,EF,EC=get_param(plot_Q)
+    fig, ax1 = plt.subplots(figsize=(13,5))
+    color = 'tab:red'
+    ax1.set(title='Ef={}[ev]'.format(EF))
+    ax1.set_xlabel('Energy in eV')
+    ax1.set_ylabel('', color=color)
+    ax1.plot(E_t, np, color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+    # draw vertical line from (70,100) to (70, 250)
+    plt.plot([-4, -4], [0.0, 0.03], ls='--', lw=1,color='b')
+    plt.plot([-5, -5], [0.0, 0.03], ls='--', lw=1,color='b')
+    plt.plot([EF, EF], [0.0, 0.03], ls=':', lw=2,color='g')
+    fig.savefig(r"file path.png".format(EF))    
